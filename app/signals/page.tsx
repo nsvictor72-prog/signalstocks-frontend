@@ -26,15 +26,31 @@ interface Signal {
 }
 
 function Badge({ type }: { type: string }) {
-  const up = type?.toUpperCase().includes("BUY");
+  const upper = type?.toUpperCase() ?? "";
+  const isBuy  = upper.includes("BUY");
+  const isHold = upper === "HOLD";
+  const isSell = upper.includes("SELL");
+  const cls = isBuy  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+            : isHold ? "bg-amber-500/20  text-amber-400  border-amber-500/30"
+            : isSell ? "bg-red-500/20    text-red-400    border-red-500/30"
+            :          "bg-slate-700     text-slate-400  border-slate-600";
+  const arrow = isBuy ? "▲" : isHold ? "—" : "▼";
   return (
-    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-      up ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-         : "bg-red-500/20 text-red-400 border border-red-500/30"
-    }`}>
-      {up ? "▲" : "▼"} {type}
+    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${cls}`}>
+      {arrow} {type}
     </span>
   );
+}
+
+/** Returns CC strike, premium range, and approx expiry for a given price. */
+function ccCalc(price: number) {
+  const strike  = price * 1.10;
+  const premLow = price * 0.02;
+  const premMid = price * 0.03;
+  const premHigh= price * 0.04;
+  const expiry  = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                    .toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return { strike, premLow, premMid, premHigh, expiry };
 }
 
 function ScoreCell({ val, max = 100 }: { val: number; max?: number }) {
@@ -50,7 +66,7 @@ function ScoreCell({ val, max = 100 }: { val: number; max?: number }) {
   );
 }
 
-const ALL_TYPES = ["ALL", "STRONG_BUY", "BUY", "SELL", "STRONG_SELL"];
+const ALL_TYPES = ["ALL", "STRONG_BUY", "BUY", "HOLD", "SELL", "STRONG_SELL"];
 
 export default function SignalsPage() {
   const router = useRouter();
@@ -180,6 +196,7 @@ export default function SignalsPage() {
                 <th className="px-4 py-3 text-right text-slate-400 font-medium">TP1</th>
                 <th className="px-4 py-3 text-right text-slate-400 font-medium">TP2</th>
                 <th className="px-4 py-3 text-left text-slate-400 font-medium">Reason</th>
+                <th className="px-4 py-3 text-left text-slate-400 font-medium whitespace-nowrap">Covered Call</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -209,6 +226,19 @@ export default function SignalsPage() {
                     <td className="px-4 py-3 text-right tabular-nums text-emerald-400">${sig.take_profit_1?.toFixed(2) ?? "—"}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-emerald-300">{sig.take_profit_2 ? `$${sig.take_profit_2.toFixed(2)}` : "—"}</td>
                     <td className="px-4 py-3 text-slate-400 max-w-[200px] truncate">{sig.primary_reason}</td>
+                    <td className="px-4 py-3">
+                      {sig.signal_type?.toUpperCase() === "HOLD" && sig.entry_price ? (() => {
+                        const cc = ccCalc(sig.entry_price);
+                        return (
+                          <span className="inline-flex flex-col gap-0.5">
+                            <span className="text-amber-400 font-semibold text-xs">💰 Sell CC</span>
+                            <span className="text-slate-300 text-xs tabular-nums whitespace-nowrap">
+                              ${cc.strike.toFixed(2)} · ~${cc.premMid.toFixed(2)} · 30d
+                            </span>
+                          </span>
+                        );
+                      })() : <span className="text-slate-700 text-xs">—</span>}
+                    </td>
                     <td className="px-4 py-3 text-slate-500">
                       <svg className={`w-4 h-4 transition-transform ${expanded === sig.ticker ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -217,8 +247,49 @@ export default function SignalsPage() {
                   </tr>
                   {expanded === sig.ticker && (
                     <tr key={`${sig.ticker}-exp`} className="bg-slate-900/60">
-                      <td colSpan={15} className="px-5 py-4">
+                      <td colSpan={16} className="px-5 py-4">
                         <div>
+                          {sig.signal_type?.toUpperCase() === "HOLD" && sig.entry_price && (() => {
+                            const cc = ccCalc(sig.entry_price);
+                            return (
+                              <div className="mb-4 bg-amber-950/30 border border-amber-700/30 rounded-xl px-4 py-4">
+                                <p className="text-amber-400 font-semibold text-xs uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                                  💰 Covered Call Opportunity
+                                  <span className="text-amber-600 normal-case font-normal">— est. only, not a guarantee</span>
+                                </p>
+                                <div className="grid sm:grid-cols-4 gap-4 text-sm mb-3">
+                                  <div>
+                                    <div className="text-slate-500 text-xs mb-0.5">Suggested Strike</div>
+                                    <div className="text-white font-bold tabular-nums">${cc.strike.toFixed(2)}</div>
+                                    <div className="text-slate-600 text-xs">10% above ${sig.entry_price.toFixed(2)}</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-slate-500 text-xs mb-0.5">Est. Premium Range</div>
+                                    <div className="text-amber-400 font-bold tabular-nums">
+                                      ${cc.premLow.toFixed(2)} – ${cc.premHigh.toFixed(2)}
+                                    </div>
+                                    <div className="text-slate-600 text-xs">2–4% of stock price</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-slate-500 text-xs mb-0.5">Expiration</div>
+                                    <div className="text-white font-bold">30 days</div>
+                                    <div className="text-slate-600 text-xs">~{cc.expiry}</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-slate-500 text-xs mb-0.5">If Called Away</div>
+                                    <div className="text-emerald-400 font-bold tabular-nums">+10% gain</div>
+                                    <div className="text-slate-600 text-xs">+ premium kept either way</div>
+                                  </div>
+                                </div>
+                                <p className="text-slate-500 text-xs leading-relaxed">
+                                  Premiums are estimated at 2–4% of the stock price. Actual premiums depend on implied
+                                  volatility, bid-ask spread, and market conditions at time of execution.
+                                  Requires Level 1 options approval at your broker.{" "}
+                                  <a href="/strategy" className="text-amber-400 hover:underline">Learn how covered calls work →</a>
+                                </p>
+                              </div>
+                            );
+                          })()}
                           {sig.explanation && (
                             <div className="mb-4 bg-emerald-950/40 border border-emerald-800/40 rounded-xl px-4 py-3">
                               <p className="text-emerald-400 font-semibold text-xs uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
@@ -246,7 +317,7 @@ export default function SignalsPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={15} className="px-4 py-12 text-center text-slate-500">
+                  <td colSpan={16} className="px-4 py-12 text-center text-slate-500">
                     No signals match the current filters.
                   </td>
                 </tr>
