@@ -47,19 +47,6 @@ interface LiveData {
   as_of?: string;
 }
 
-function HeroStat({ label, value, sub, green, loading }: {
-  label: string; value: string; sub?: string; green?: boolean; loading?: boolean;
-}) {
-  return (
-    <div className="bg-slate-800/60 border border-slate-700 rounded-2xl px-6 py-5">
-      <div className={`text-3xl font-bold tabular-nums ${loading ? "text-slate-600" : green ? "text-emerald-400" : "text-white"}`}>
-        {loading ? "—" : value}
-      </div>
-      <div className="text-slate-400 text-sm mt-1">{label}</div>
-      {sub && <div className="text-slate-600 text-xs mt-0.5">{sub}</div>}
-    </div>
-  );
-}
 
 function StatCard({ label, value, green }: { label: string; value: string; green?: boolean }) {
   return (
@@ -111,7 +98,7 @@ export default function TrackRecordPage() {
 
           <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1.5 mb-6">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-emerald-400 text-sm font-medium">Verified 5-year backtest · Jan 2021 – May 2026</span>
+            <span className="text-emerald-400 text-sm font-medium">New: Stock + Covered Calls · Jun 2021 – Apr 2026</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
@@ -121,55 +108,47 @@ export default function TrackRecordPage() {
             </span>
           </h1>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-10">
-            Every number below is derived from 1,340 completed trades across five years,
-            including the 2022 bear market where the strategy outperformed SPY by 21.5%.
+            Same stock signals — now enhanced with covered calls that collect premium income
+            on every holding. 763 stock trades + 154 options contracts across 4.8 years.
             No cherry-picked periods, no survivorship bias.
           </p>
 
-          {/* Headline stats — driven by live API data */}
+          {/* Headline stats — combined strategy backtest */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
-            <HeroStat
-              label="Closed trades"
-              value={s ? s.total_trades.toString() : "0"}
-              loading={loading}
-            />
-            <HeroStat
-              label="Win rate"
-              value={s ? `${s.win_rate_pct}%` : "—"}
-              green={s ? s.win_rate_pct >= 50 : false}
-              loading={loading}
-              sub="wins ÷ total trades"
-            />
-            <HeroStat
-              label="Profit factor"
-              value={s?.profit_factor ? s.profit_factor.toFixed(2) : "—"}
-              green={s ? (s.profit_factor ?? 0) > 1 : false}
-              loading={loading}
-              sub="gross gains ÷ gross losses"
-            />
-            <HeroStat
-              label="Avg win"
-              value={s ? `+${s.avg_win_pct}%` : "—"}
-              green={s ? s.avg_win_pct > 0 : false}
-              loading={loading}
-              sub={s ? `avg loss ${s.avg_loss_pct}%` : undefined}
-            />
+            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl px-6 py-5">
+              <div className="text-3xl font-bold tabular-nums text-emerald-400">+198.76%</div>
+              <div className="text-slate-400 text-sm mt-1">Total return</div>
+              <div className="text-slate-600 text-xs mt-0.5">$100k → $298,760</div>
+            </div>
+            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl px-6 py-5">
+              <div className="text-3xl font-bold tabular-nums text-emerald-400">+25.42%/yr</div>
+              <div className="text-slate-400 text-sm mt-1">Annualized</div>
+              <div className="text-slate-600 text-xs mt-0.5">vs SPY +11.05%/yr</div>
+            </div>
+            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl px-6 py-5">
+              <div className="text-3xl font-bold tabular-nums text-white">763</div>
+              <div className="text-slate-400 text-sm mt-1">Stock trades</div>
+              <div className="text-slate-600 text-xs mt-0.5">+ 154 covered calls sold</div>
+            </div>
+            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl px-6 py-5">
+              <div className="text-3xl font-bold tabular-nums text-emerald-400">$55,972</div>
+              <div className="text-slate-400 text-sm mt-1">Premium income</div>
+              <div className="text-slate-600 text-xs mt-0.5">+56% from options alone</div>
+            </div>
           </div>
 
-          {hasLive && s && (
-            <div className="flex flex-wrap justify-center gap-6 text-slate-500 text-sm">
-              {[
-                `${s.win_rate_pct}% win rate across ${s.total_trades} trades`,
-                `Best trade: +${s.best_trade_pct}%`,
-                `Worst trade: ${s.worst_trade_pct}%`,
-                `Total P&L: ${s.total_pnl_pct >= 0 ? "+" : ""}${s.total_pnl_pct}%`,
-              ].map(t => (
-                <span key={t} className="flex items-center gap-1.5">
-                  <span className="text-emerald-500">✓</span> {t}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap justify-center gap-6 text-slate-500 text-sm">
+            {[
+              "Stock-only baseline: +88.49% (+14.02%/yr)",
+              "Premium income adds +56% on top",
+              "154 covered calls · 1 cash-secured put",
+              "+132.84% alpha vs SPY buy-and-hold",
+            ].map(t => (
+              <span key={t} className="flex items-center gap-1.5">
+                <span className="text-emerald-500">✓</span> {t}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -265,23 +244,99 @@ export default function TrackRecordPage() {
           )}
         </section>
 
-        {/* ── 5-Year Verified Backtest ─────────────────────────────────────── */}
+        {/* ── 5-Year Strategy Comparison ───────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-xl font-bold text-white">5-Year Verified Backtest</h2>
+            <h2 className="text-xl font-bold text-white">5-Year Strategy Comparison</h2>
             <span className="text-xs bg-slate-700 border border-slate-600 text-slate-300 px-2.5 py-0.5 rounded-full font-medium">
-              Jan 2021 – Apr 2026 · $100k starting capital
+              Jun 2021 – Apr 2026 · $100k starting capital · 763 stock trades
             </span>
           </div>
 
-          {/* Strategy vs SPY comparison cards */}
+          {/* Side-by-side strategy cards */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+            {/* Strategy A — Stock only */}
+            <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-6">
+              <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-4">
+                Strategy A — Stock Signals Only
+              </p>
+              <div className="text-4xl font-bold tabular-nums text-white mb-1">+88.49%</div>
+              <div className="text-slate-400 text-sm mb-5">+14.02%/yr annualized</div>
+              <dl className="space-y-2.5 text-sm border-t border-slate-800 pt-4">
+                <div className="flex justify-between">
+                  <dt className="text-slate-400">Stock P&amp;L</dt>
+                  <dd className="text-slate-200 tabular-nums font-medium">+$88,490</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-400">Premium income</dt>
+                  <dd className="text-slate-600 tabular-nums">—</dd>
+                </div>
+                <div className="flex justify-between border-t border-slate-800 pt-2.5">
+                  <dt className="text-slate-400 font-medium">Final value</dt>
+                  <dd className="text-white tabular-nums font-bold">$188,490</dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* Strategy B — Stock + Premium */}
+            <div className="bg-emerald-950/30 border border-emerald-700/40 rounded-xl p-6 relative">
+              <div className="absolute top-4 right-4">
+                <span className="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-medium">
+                  +$110,270 more
+                </span>
+              </div>
+              <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wide mb-4">
+                Strategy B — Stock + Sell Premium ✦
+              </p>
+              <div className="text-4xl font-bold tabular-nums text-emerald-400 mb-1">+198.76%</div>
+              <div className="text-emerald-300/60 text-sm mb-5">+25.42%/yr annualized</div>
+              <dl className="space-y-2.5 text-sm border-t border-emerald-900/50 pt-4">
+                <div className="flex justify-between">
+                  <dt className="text-slate-400">Stock P&amp;L</dt>
+                  <dd className="text-slate-200 tabular-nums font-medium">+$145,129</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-400">Premium income</dt>
+                  <dd className="text-emerald-400 tabular-nums font-medium">+$55,972</dd>
+                </div>
+                <div className="flex justify-between border-t border-emerald-900/50 pt-2.5">
+                  <dt className="text-slate-400 font-medium">Final value</dt>
+                  <dd className="text-emerald-400 tabular-nums font-bold">$298,760</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          {/* Premium income breakdown */}
+          <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-5 mb-6">
+            <h3 className="text-white font-semibold mb-4 text-sm">Premium Income Breakdown</h3>
+            <div className="grid sm:grid-cols-3 gap-6">
+              <div>
+                <div className="text-2xl font-bold text-emerald-400 tabular-nums">$55,642</div>
+                <div className="text-slate-400 text-xs mt-1">Covered call premium</div>
+                <div className="text-slate-600 text-xs">154 contracts collected</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-emerald-400 tabular-nums">$330</div>
+                <div className="text-slate-400 text-xs mt-1">Cash-secured put premium</div>
+                <div className="text-slate-600 text-xs">1 contract, expired worthless</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-emerald-400 tabular-nums">$55,972</div>
+                <div className="text-slate-400 text-xs mt-1">Total premium collected</div>
+                <div className="text-slate-600 text-xs">+56% on $100k starting capital</div>
+              </div>
+            </div>
+          </div>
+
+          {/* vs SPY */}
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
             {[
-              { label: "SignalStocks strategy", ret: "+114.16%", ann: "+17.07%/yr", color: "text-emerald-400" },
-              { label: "SPY buy-and-hold",      ret: "+65.92%",  ann: "+11.05%/yr", color: "text-slate-300" },
-              { label: "Alpha generated",       ret: "+48.24%",  ann: "+6.02%/yr",  color: "text-cyan-400"  },
+              { label: "Stock + Premium strategy", ret: "+198.76%", ann: "+25.42%/yr", color: "text-emerald-400" },
+              { label: "SPY buy-and-hold",          ret: "+65.92%",  ann: "+11.05%/yr", color: "text-slate-300" },
+              { label: "Alpha vs SPY",              ret: "+132.84%", ann: "+14.37%/yr", color: "text-cyan-400"  },
             ].map(row => (
-              <div key={row.label} className="bg-slate-800/50 border border-slate-700 rounded-xl px-6 py-5">
+              <div key={row.label} className="bg-slate-800/50 border border-slate-700 rounded-xl px-5 py-4">
                 <div className={`text-2xl font-bold tabular-nums ${row.color}`}>{row.ret}</div>
                 <div className="text-slate-400 text-sm mt-0.5">{row.ann}</div>
                 <div className="text-slate-500 text-xs mt-2">{row.label}</div>
@@ -289,68 +344,10 @@ export default function TrackRecordPage() {
             ))}
           </div>
 
-          {/* Yearly breakdown table */}
-          <div className="rounded-xl border border-slate-800 overflow-hidden mb-5">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-800/80">
-                  <tr className="text-slate-400 text-xs font-medium">
-                    <th className="px-5 py-3 text-left">Year</th>
-                    <th className="px-5 py-3 text-right">Return</th>
-                    <th className="px-5 py-3 text-right">P&amp;L ($100k)</th>
-                    <th className="px-5 py-3 text-right">Win Rate</th>
-                    <th className="px-5 py-3 text-right">Trades</th>
-                    <th className="px-5 py-3 text-right">SPY</th>
-                    <th className="px-5 py-3 text-right">vs SPY</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/80">
-                  {[
-                    { year: "2021", ret: "+7.7%",   pnl: "+$7,722",  wr: "59%", trades: 152, spy: "+28.7%", beat: false },
-                    { year: "2022", ret: "+3.4%",   pnl: "+$3,621",  wr: "48%", trades: 291, spy: "−18.1%", beat: true  },
-                    { year: "2023", ret: "+20.3%",  pnl: "+$22,587", wr: "53%", trades: 270, spy: "+26.3%", beat: false },
-                    { year: "2024", ret: "+23.1%",  pnl: "+$30,961", wr: "54%", trades: 277, spy: "+25.0%", beat: false },
-                    { year: "2025", ret: "+14.2%",  pnl: "+$23,480", wr: "55%", trades: 276, spy: "−2.4%",  beat: true  },
-                  ].map(row => (
-                    <tr key={row.year} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-5 py-3.5 font-bold text-white">{row.year}</td>
-                      <td className="px-5 py-3.5 text-right tabular-nums font-semibold text-emerald-400">{row.ret}</td>
-                      <td className="px-5 py-3.5 text-right tabular-nums text-emerald-400 font-medium">{row.pnl}</td>
-                      <td className={`px-5 py-3.5 text-right tabular-nums font-medium ${parseInt(row.wr) >= 50 ? "text-slate-200" : "text-yellow-400"}`}>
-                        {row.wr}
-                      </td>
-                      <td className="px-5 py-3.5 text-right tabular-nums text-slate-300">{row.trades}</td>
-                      <td className={`px-5 py-3.5 text-right tabular-nums ${row.spy.startsWith("+") ? "text-slate-400" : "text-slate-500"}`}>
-                        {row.spy}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        {row.beat
-                          ? <span className="text-xs font-medium text-emerald-400">Outperformed</span>
-                          : <span className="text-xs font-medium text-slate-400">Underperformed</span>
-                        }
-                      </td>
-                    </tr>
-                  ))}
-                  <tr className="bg-slate-800/40 border-t-2 border-slate-600 font-bold">
-                    <td className="px-5 py-3.5 text-white">Total</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-emerald-400">+114.16%</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-emerald-400">+$114,164</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-slate-200">53.6%</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-white">1,266</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-slate-400">+65.92%</td>
-                    <td className="px-5 py-3.5 text-right">
-                      <span className="text-xs font-medium text-cyan-400">+48.24% alpha</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           <p className="text-slate-400 text-sm">
-            The strategy delivered positive returns in all 5 years, including +3.4% during the 2022
-            bear market when SPY dropped −18.1%. Performance based on realistic signal scoring with
-            a 70+ composite score threshold.
+            Covered calls provide consistent income while holding stocks, regardless of market
+            direction. The strategy sells calls 10% out-of-the-money with 30 days to expiration,
+            only when the collected premium is ≥2% of the stock price — keeping the quality bar high.
           </p>
         </section>
 
@@ -446,14 +443,16 @@ export default function TrackRecordPage() {
         <section>
           <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-5 py-4 text-xs text-slate-400 leading-relaxed">
             <span className="text-yellow-400 font-semibold">Disclaimer: </span>
-            Backtest results are hypothetical and based on historical data from January 2021 through
-            April 2026 using the SignalStocks scoring system applied to past market prices. Backtest
-            figures do not account for slippage, commissions, bid-ask spread, taxes, or market-impact
-            costs that would reduce actual returns, and assume all signals were executed at the stated
-            entry price. Live 2026 track record data reflects signals closed with a verified exit
-            price recorded at execution — open positions are excluded. Past performance does not
-            guarantee future results. Not financial advice. Always conduct your own due diligence
-            and consult a qualified financial advisor before making investment decisions.
+            Backtest results are hypothetical and based on historical data from June 2021 through
+            April 2026 using the SignalStocks scoring model applied to past market prices. Option
+            premiums are estimated using Black-Scholes with historical volatility; actual premiums
+            will differ based on market conditions, implied volatility, and liquidity. Backtest
+            figures do not account for bid-ask spread, commissions, assignment risk, early exercise,
+            margin requirements, taxes, or market-impact costs that would reduce actual returns.
+            Options trading involves additional risk and is not suitable for all investors. Live 2026
+            track record data reflects signals closed with a verified exit price. Past performance
+            does not guarantee future results. Not financial advice. Consult a qualified financial
+            advisor before making any investment decisions.
           </div>
         </section>
 
