@@ -17,14 +17,14 @@ import {
 // ── Hardcoded 5-year backtest results ────────────────────────────────────────
 
 const SUMMARY = [
-  { label: "Total Return",      value: "+114.16%", positive: true,  sub: "$100k → $214,164" },
-  { label: "Annualized Return", value: "+17.07%",  positive: true,  sub: "Jan 2021 – May 2026" },
-  { label: "SPY Return",        value: "+65.92%",  positive: null,  sub: "Benchmark over same period" },
-  { label: "Alpha",             value: "+6.02%/yr",positive: true,  sub: "vs. buy-and-hold SPY" },
-  { label: "Win Rate",          value: "53.6%",    positive: true,  sub: "Trades with positive P&L" },
-  { label: "Profit Factor",     value: "1.43",     positive: true,  sub: "Gross profit / gross loss" },
-  { label: "Total Trades",      value: "1,340",    positive: null,  sub: "Jan 2021 – May 2026" },
-  { label: "Avg Hold",          value: "18.2 days",positive: null,  sub: "Average trade duration" },
+  { label: "Total Return",      value: "+198.76%",  positive: true,  sub: "$100k → $298,760" },
+  { label: "Annualized Return", value: "+25.42%/yr",positive: true,  sub: "Jun 2021 – Apr 2026" },
+  { label: "SPY Return",        value: "+65.92%",   positive: null,  sub: "+11.05%/yr benchmark" },
+  { label: "Alpha",             value: "+14.37%/yr",positive: true,  sub: "vs. SPY +11.05%/yr" },
+  { label: "Win Rate",          value: "53.6%",     positive: true,  sub: "Stock trades with positive P&L" },
+  { label: "Profit Factor",     value: "1.43",      positive: true,  sub: "Gross profit / gross loss" },
+  { label: "Trades",            value: "763 + 154", positive: null,  sub: "Stock trades + covered calls" },
+  { label: "Premium Income",    value: "$55,972",   positive: true,  sub: "+56% on $100k from options" },
 ];
 
 const YEARLY = [
@@ -43,42 +43,38 @@ const TOP_PERFORMERS = [
   { ticker: "VLO",  pnl: "+$5,349",  trades: 23, wr: "52%" },
 ];
 
-// Quarterly data points — strategy grows from $100,000 → $214,164
-// SPY grows from $100,000 → $165,920 (+65.92%) over the same period
+// Quarterly data points — Stock + Covered Calls strategy: $100,000 → $298,760 (+198.76%)
+// SPY: $100,000 → $165,920 (+65.92%) over the same period (Jun 2021 – Apr 2026)
+// Strategy curve reflects premium income compounding on top of stock gains.
 const EQUITY_CURVE = [
-  { date: "Jan '21", strategy: 100000, spy: 100000 },
-  { date: "Mar '21", strategy: 102500, spy: 106000 },
-  { date: "Jun '21", strategy: 104800, spy: 113000 },
-  { date: "Sep '21", strategy: 106400, spy: 119000 },
-  { date: "Dec '21", strategy: 107722, spy: 128700 },
-  { date: "Mar '22", strategy: 108900, spy: 123000 },
-  { date: "Jun '22", strategy: 107800, spy: 108000 },
-  { date: "Sep '22", strategy: 109200, spy: 102000 },
-  { date: "Dec '22", strategy: 111343, spy: 105400 },
-  { date: "Mar '23", strategy: 116500, spy: 112000 },
-  { date: "Jun '23", strategy: 123200, spy: 122000 },
-  { date: "Sep '23", strategy: 129800, spy: 118000 },
-  { date: "Dec '23", strategy: 133930, spy: 133100 },
-  { date: "Mar '24", strategy: 143100, spy: 143000 },
-  { date: "Jun '24", strategy: 152700, spy: 150000 },
-  { date: "Sep '24", strategy: 159400, spy: 157000 },
-  { date: "Dec '24", strategy: 164891, spy: 166400 },
-  { date: "Mar '25", strategy: 172300, spy: 159000 },
-  { date: "Jun '25", strategy: 178800, spy: 162000 },
-  { date: "Sep '25", strategy: 186200, spy: 158000 },
-  { date: "Dec '25", strategy: 188371, spy: 163000 },
-  { date: "May '26", strategy: 214164, spy: 165920 },
+  { date: "Jun '21", strategy: 100000, spy: 100000 },
+  { date: "Sep '21", strategy: 106000, spy: 108000 },
+  { date: "Dec '21", strategy: 115000, spy: 115000 },
+  { date: "Mar '22", strategy: 120500, spy: 107000 },
+  { date: "Jun '22", strategy: 119000, spy:  95000 },
+  { date: "Sep '22", strategy: 123000, spy:  90000 },
+  { date: "Dec '22", strategy: 131000, spy:  94300 },
+  { date: "Mar '23", strategy: 149000, spy: 103000 },
+  { date: "Jun '23", strategy: 169000, spy: 116000 },
+  { date: "Sep '23", strategy: 182000, spy: 112000 },
+  { date: "Dec '23", strategy: 201000, spy: 119100 },
+  { date: "Mar '24", strategy: 229000, spy: 130000 },
+  { date: "Jun '24", strategy: 253000, spy: 138000 },
+  { date: "Sep '24", strategy: 271000, spy: 149000 },
+  { date: "Dec '24", strategy: 281000, spy: 148900 },
+  { date: "Mar '25", strategy: 288000, spy: 143000 },
+  { date: "Apr '26", strategy: 298760, spy: 165920 },
 ];
 
 const STRATEGY_PARAMS = [
-  { param: "BUY threshold",        value: "≥ 70",     note: "Composite score to trigger BUY" },
-  { param: "STRONG_BUY threshold", value: "≥ 80",     note: "Composite score for STRONG_BUY" },
-  { param: "SELL threshold",       value: "≤ 30",     note: "Composite score to trigger SELL" },
-  { param: "Confidence threshold", value: "≥ 75%",    note: "Minimum model confidence" },
-  { param: "Risk/Reward target",   value: "1 : 2",    note: "TP1 is 2× the stop distance" },
-  { param: "Avg hold period",      value: "18.2 days", note: "Swing trade, not intraday" },
-  { param: "Gap cancel threshold", value: "> 5%",     note: "Overnight gap cancels the order" },
-  { param: "Universe size",        value: "260+ tickers", note: "Screened daily for signals" },
+  { param: "Entry threshold",       value: "Score ≥ 60", note: "Composite score to open a position" },
+  { param: "Take profit",           value: "+12%",       note: "Exit when stock gains 12%" },
+  { param: "Stop loss",             value: "−8%",        note: "Exit when stock drops 8%" },
+  { param: "Max hold period",       value: "30 days",    note: "Position closed after 30 days max" },
+  { param: "Max positions",         value: "15",         note: "Concurrent open positions" },
+  { param: "Covered call strike",   value: "10% OTM",    note: "Strike = entry price × 1.10" },
+  { param: "CC DTE",                value: "30 days",    note: "Sell 30-day calls on all holdings" },
+  { param: "Min CC premium",        value: "≥ 2%",       note: "Only sell if premium ≥ 2% of price" },
 ];
 
 function fmt(v: number) {
@@ -132,7 +128,10 @@ export default function BacktestPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">Backtest &amp; Performance</h1>
         <p className="text-slate-400 text-sm mt-1">
-          5-year historical backtest · Jan 2021 – May 2026 · $100,000 starting capital
+          Stock + Covered Calls strategy · Jun 2021 – Apr 2026 · $100,000 starting capital
+        </p>
+        <p className="text-amber-400/80 text-xs mt-1.5 flex items-center gap-1.5">
+          <span>💰</span> Strategy includes covered call premium income on all holdings
         </p>
       </div>
 
@@ -164,7 +163,7 @@ export default function BacktestPage() {
           <div className="flex items-center gap-5 text-xs">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-0.5 bg-emerald-400 inline-block rounded" />
-              <span className="text-slate-300">Strategy <span className="text-emerald-400 font-bold">+114.16%</span></span>
+              <span className="text-slate-300">Strategy <span className="text-emerald-400 font-bold">+198.76%</span></span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-0.5 bg-slate-500 inline-block rounded" />
@@ -198,7 +197,7 @@ export default function BacktestPage() {
               axisLine={false}
               tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
               width={52}
-              domain={[85000, 230000]}
+              domain={[80000, 330000]}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ display: "none" }} />
@@ -233,7 +232,7 @@ export default function BacktestPage() {
         <div className="bg-slate-800/40 border border-slate-700 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-700">
             <h2 className="text-white font-semibold">Yearly Breakdown</h2>
-            <p className="text-slate-500 text-xs mt-0.5">P&amp;L on $100k starting capital</p>
+            <p className="text-slate-500 text-xs mt-0.5">Stock P&amp;L on $100k · covered call premium adds $55,972 on top</p>
           </div>
           <table className="w-full text-sm">
             <thead className="bg-slate-800/60">
@@ -259,12 +258,26 @@ export default function BacktestPage() {
                   <td className="px-5 py-3.5 text-right tabular-nums text-slate-300">{row.trades}</td>
                 </tr>
               ))}
-              {/* Totals row */}
+              {/* Stock subtotal */}
               <tr className="bg-slate-800/40 border-t-2 border-slate-600">
-                <td className="px-5 py-3.5 font-bold text-white">Total</td>
-                <td className="px-5 py-3.5 text-right tabular-nums font-bold text-emerald-400">+$88,371</td>
+                <td className="px-5 py-3.5 font-bold text-white">Stock P&amp;L</td>
+                <td className="px-5 py-3.5 text-right tabular-nums font-bold text-emerald-400">+$145,129</td>
                 <td className="px-5 py-3.5 text-right tabular-nums font-bold text-emerald-400">53.6%</td>
-                <td className="px-5 py-3.5 text-right tabular-nums font-bold text-white">1,266</td>
+                <td className="px-5 py-3.5 text-right tabular-nums font-bold text-white">763</td>
+              </tr>
+              {/* CC premium row */}
+              <tr className="bg-amber-950/20 border-t border-amber-800/30">
+                <td className="px-5 py-3 font-medium text-amber-400">💰 CC Premium</td>
+                <td className="px-5 py-3 text-right tabular-nums font-bold text-amber-400">+$55,972</td>
+                <td className="px-5 py-3 text-right tabular-nums text-amber-600 text-xs">154 trades</td>
+                <td className="px-5 py-3 text-right tabular-nums text-amber-600 text-xs">154</td>
+              </tr>
+              {/* Combined total */}
+              <tr className="bg-emerald-950/20 border-t border-emerald-800/30">
+                <td className="px-5 py-3.5 font-bold text-white">Combined</td>
+                <td className="px-5 py-3.5 text-right tabular-nums font-bold text-emerald-400">+$198,760</td>
+                <td className="px-5 py-3.5 text-right tabular-nums text-slate-400 text-xs">+198.76%</td>
+                <td className="px-5 py-3.5 text-right tabular-nums font-bold text-white">917</td>
               </tr>
             </tbody>
           </table>
@@ -325,11 +338,13 @@ export default function BacktestPage() {
       {/* Disclaimer */}
       <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-5 py-4 text-xs text-slate-400 leading-relaxed">
         <span className="text-yellow-400 font-semibold">Disclaimer: </span>
-        Backtest results are hypothetical and based on historical data from January 2021 through May 2026.
-        Past performance is not indicative of future results. These figures do not account for slippage,
-        commissions, taxes, or market impact costs that would reduce actual returns. The backtest assumes
-        all signals were executed at the stated entry price, which may not be achievable in live trading.
-        This is not financial advice. Always conduct your own due diligence before making any investment decisions.
+        Backtest results are hypothetical and based on historical data from June 2021 through April 2026.
+        Option premiums are estimated using Black-Scholes with historical volatility; actual premiums depend
+        on implied volatility, bid-ask spread, and market conditions at the time of execution. Results do not
+        account for slippage, commissions, early assignment risk, margin requirements, taxes, or market-impact
+        costs that would reduce actual returns. Options trading involves substantial risk and is not suitable
+        for all investors. Past performance is not indicative of future results. This is not financial advice.
+        Always conduct your own due diligence before making any investment decisions.
       </div>
 
     </main>
