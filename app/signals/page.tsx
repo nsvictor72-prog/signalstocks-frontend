@@ -227,7 +227,7 @@ export default function SignalsPage() {
                     <td className="px-4 py-3 text-right tabular-nums text-emerald-300">{sig.take_profit_2 ? `$${sig.take_profit_2.toFixed(2)}` : "—"}</td>
                     <td className="px-4 py-3 text-slate-400 max-w-[200px] truncate">{sig.primary_reason}</td>
                     <td className="px-4 py-3">
-                      {sig.signal_type?.toUpperCase() === "HOLD" && sig.entry_price ? (() => {
+                      {sig.signal_type?.toUpperCase() === "STRONG_BUY" && sig.entry_price ? (() => {
                         const cc = ccCalc(sig.entry_price);
                         return (
                           <span className="inline-flex flex-col gap-0.5">
@@ -249,7 +249,7 @@ export default function SignalsPage() {
                     <tr key={`${sig.ticker}-exp`} className="bg-slate-900/60">
                       <td colSpan={16} className="px-5 py-4">
                         <div>
-                          {sig.signal_type?.toUpperCase() === "HOLD" && sig.entry_price && (() => {
+                          {sig.signal_type?.toUpperCase() === "STRONG_BUY" && sig.entry_price && (() => {
                             const cc = ccCalc(sig.entry_price);
                             return (
                               <div className="mb-4 bg-amber-950/30 border border-amber-700/30 rounded-xl px-4 py-4">
