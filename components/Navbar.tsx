@@ -58,7 +58,7 @@ export default function Navbar() {
     <nav className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-screen-2xl mx-auto px-4 flex items-center justify-between h-14">
         {/* Logo */}
-        <Link href="/" className="shrink-0 mr-4">
+        <Link href={loggedIn ? "/signals" : "/"} className="shrink-0 mr-4">
           <span className="text-emerald-400 font-bold text-lg tracking-tight">
             signal<span className="text-white">stocks</span>
           </span>
