@@ -19,6 +19,7 @@ const NAV_LINKS = [
 const PUBLIC_NAV = [
   { href: "/strategy",     label: "Strategy" },
   { href: "/track-record", label: "Track Record" },
+  { href: "/faq",          label: "FAQ" },
 ];
 
 export default function Navbar() {
@@ -122,6 +123,16 @@ export default function Navbar() {
                 }`}
               >
                 Track Record
+              </Link>
+              <Link
+                href="/faq"
+                className={`text-sm transition-colors hidden sm:block ${
+                  pathname === "/faq"
+                    ? "text-white font-medium"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                FAQ
               </Link>
               <Link href="/login" className="text-slate-300 hover:text-white text-sm transition-colors">
                 Login
