@@ -18,11 +18,6 @@ const HOW_IT_WORKS = [
   },
 ];
 
-const SAMPLE_SIGNALS = [
-  { ticker: "NVDA", type: "BULLISH", score: 87, reason: "Breakout with volume surge" },
-  { ticker: "AAPL", type: "BULLISH", score: 81, reason: "Golden cross + options flow" },
-  { ticker: "SPY",  type: "BEARISH", score: 76, reason: "Distribution pattern detected" },
-];
 
 export default function LandingPage() {
   return (
@@ -83,62 +78,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Sample signals preview */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-900/40">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-center text-slate-400 text-sm font-semibold uppercase tracking-widest mb-8">
-            Today&apos;s top signals (preview)
-          </h2>
-          <div className="overflow-x-auto rounded-xl border border-slate-800">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-800/80">
-                <tr>
-                  <th className="px-6 py-3 text-left text-slate-400 font-medium">Ticker</th>
-                  <th className="px-6 py-3 text-left text-slate-400 font-medium">Signal</th>
-                  <th className="px-6 py-3 text-left text-slate-400 font-medium">Score</th>
-                  <th className="px-6 py-3 text-left text-slate-400 font-medium">Primary Reason</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {SAMPLE_SIGNALS.map((s) => (
-                  <tr key={s.ticker} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-6 py-4 font-bold text-white">{s.ticker}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                          s.type === "BULLISH"
-                            ? "bg-emerald-500/20 text-emerald-400"
-                            : "bg-red-500/20 text-red-400"
-                        }`}
-                      >
-                        {s.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-emerald-400 rounded-full"
-                            style={{ width: `${s.score}%` }}
-                          />
-                        </div>
-                        <span className="text-slate-300 font-medium">{s.score}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-slate-400">{s.reason}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-center text-slate-500 text-sm mt-4">
-            Free account includes 10 signals/day.{" "}
-            <Link href="/register" className="text-emerald-400 hover:underline">
-              Sign up to unlock
-            </Link>
-          </p>
-        </div>
-      </section>
 
       {/* How it works */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
