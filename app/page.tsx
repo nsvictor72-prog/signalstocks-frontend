@@ -4,7 +4,7 @@ const HOW_IT_WORKS = [
   {
     step: "01",
     title: "AI Scans the Market",
-    desc: "Our models analyze 5,000+ stocks daily using price action, volume, options flow, and macro indicators.",
+    desc: "Our models screen 260+ large-cap stocks weekly using price action, volume, momentum, and fundamental factors.",
   },
   {
     step: "02",
@@ -14,7 +14,7 @@ const HOW_IT_WORKS = [
   {
     step: "03",
     title: "You Execute with Confidence",
-    desc: "Every signal comes with entry price, stop-loss, and two profit targets so you know exactly what to do.",
+    desc: "Every signal includes entry price, stop-loss, and profit targets. HOLD signals also show covered call strike and estimated premium to collect extra income.",
   },
 ];
 
@@ -44,14 +44,14 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-slate-400 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            AI-generated stock signals with entry, stop-loss, and profit targets.
-            Built for individual traders who want an edge.
+            AI-generated stock signals with covered call income strategies.
+            Built for individual traders who want a consistent edge.
           </p>
 
           {/* Stat callout */}
           <div className="inline-flex flex-wrap justify-center items-center gap-6 bg-slate-800/60 border border-slate-700 rounded-2xl px-8 py-5 mb-10">
             <div className="text-center">
-              <div className="text-4xl font-bold text-emerald-400">+17%</div>
+              <div className="text-4xl font-bold text-emerald-400">+25.42%</div>
               <div className="text-slate-400 text-sm mt-1">Annualized backtest return</div>
             </div>
             <div className="w-px h-12 bg-slate-700 hidden sm:block" />
@@ -62,7 +62,7 @@ export default function LandingPage() {
             <div className="w-px h-12 bg-slate-700 hidden sm:block" />
             <div className="text-center">
               <div className="text-4xl font-bold text-white">53.6%</div>
-              <div className="text-slate-400 text-sm mt-1">Win rate (12-mo)</div>
+              <div className="text-slate-400 text-sm mt-1">Win rate</div>
             </div>
           </div>
 
