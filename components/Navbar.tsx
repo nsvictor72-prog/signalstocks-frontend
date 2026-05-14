@@ -15,8 +15,9 @@ const NAV_LINKS = [
   { href: "/settings",     label: "Settings" },
 ];
 
-// Always visible — no auth required (conversion / marketing page)
+// Always visible — no auth required (conversion / marketing pages)
 const PUBLIC_NAV = [
+  { href: "/strategy",     label: "Strategy" },
   { href: "/track-record", label: "Track Record" },
 ];
 
@@ -102,6 +103,16 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <Link
+                href="/strategy"
+                className={`text-sm transition-colors hidden sm:block ${
+                  pathname === "/strategy"
+                    ? "text-white font-medium"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Strategy
+              </Link>
               <Link
                 href="/track-record"
                 className={`text-sm transition-colors hidden sm:block ${
