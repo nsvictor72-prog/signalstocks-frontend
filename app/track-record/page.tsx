@@ -159,7 +159,7 @@ export default function TrackRecordPage() {
           <div className="flex items-center gap-3 mb-5">
             <h2 className="text-xl font-bold text-white">2026 Year-to-Date (Live Trading)</h2>
             <span className="text-xs bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full font-medium">
-              Live · from database
+              Paper Trading · Simulated
             </span>
             {live?.as_of && (
               <span className="text-xs text-slate-600 ml-auto">
