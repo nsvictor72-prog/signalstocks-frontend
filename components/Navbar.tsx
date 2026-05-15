@@ -37,7 +37,9 @@ export default function Navbar() {
     router.push("/");
   }
 
-  const isLandingOrAuth = pathname === "/" || pathname === "/login" || pathname === "/register";
+  // Only suppress the app menu on auth pages — NOT on the homepage.
+  // Logged-in users can visit "/" and still see their full navigation.
+  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   function NavLink({ href, label }: { href: string; label: string }) {
     const active = pathname === href;
@@ -59,7 +61,7 @@ export default function Navbar() {
     <nav className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-screen-2xl mx-auto px-4 flex items-center justify-between h-14">
         {/* Logo */}
-        <Link href={loggedIn ? "/signals" : "/"} className="shrink-0 mr-4">
+        <Link href="/" className="shrink-0 mr-4">
           <span className="text-emerald-400 font-bold text-lg tracking-tight">
             signal<span className="text-white">stocks</span>
           </span>
@@ -68,7 +70,7 @@ export default function Navbar() {
         {/* Desktop nav */}
         <div className="hidden lg:flex items-center gap-0.5 flex-1">
           {/* Authenticated app links */}
-          {loggedIn && !isLandingOrAuth &&
+          {loggedIn && !isAuthPage &&
             NAV_LINKS.map(l => <NavLink key={l.href} {...l} />)
           }
           {/* Track Record — always visible */}
@@ -80,7 +82,7 @@ export default function Navbar() {
           {loggedIn ? (
             <>
               {/* Mobile hamburger */}
-              {!isLandingOrAuth && (
+              {!isAuthPage && (
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="lg:hidden p-2 text-slate-400 hover:text-white"
@@ -149,7 +151,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile dropdown (authenticated) */}
-      {menuOpen && loggedIn && !isLandingOrAuth && (
+      {menuOpen && loggedIn && !isAuthPage && (
         <div className="lg:hidden border-t border-slate-800 bg-slate-900 px-4 py-3">
           <div className="grid grid-cols-2 gap-1">
             {[...NAV_LINKS, ...PUBLIC_NAV].map(({ href, label }) => {
