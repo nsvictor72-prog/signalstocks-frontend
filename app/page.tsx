@@ -4,17 +4,17 @@ const HOW_IT_WORKS = [
   {
     step: "01",
     title: "AI Scans the Market",
-    desc: "Our models screen 260+ large-cap stocks weekly using price action, volume, momentum, and fundamental factors.",
+    desc: "Our AI analyzes the entire market weekly, identifying the highest-probability opportunities based on technical momentum, fundamental strength, and institutional activity.",
   },
   {
     step: "02",
     title: "Signals are Ranked",
-    desc: "Each signal receives a composite score (0–100) weighting probability, risk/reward, and sector momentum.",
+    desc: "Each opportunity is ranked by a multi-factor model that weighs probability of success, risk/reward ratio, and market conditions — so you always see the best setups first.",
   },
   {
     step: "03",
     title: "You Execute with Confidence",
-    desc: "Every signal includes entry price, stop-loss, and profit targets. HOLD signals also show covered call strike and estimated premium to collect extra income.",
+    desc: "Every signal includes entry price, stop-loss, and profit targets. STRONG_BUY signals include covered call recommendations — collect consistent premium income while holding winning positions.",
   },
 ];
 
