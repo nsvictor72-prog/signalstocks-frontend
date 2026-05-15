@@ -22,6 +22,8 @@ interface Signal {
   primary_reason: string;
   contributing_factors: string[];
   explanation?: string;
+  implied_volatility?: number;
+  cc_premium_estimate?: number;
   signal_date: string;
 }
 
@@ -248,11 +250,16 @@ export default function SignalsPage() {
                     <td className="px-4 py-3">
                       {sig.signal_type?.toUpperCase() === "STRONG_BUY" && sig.entry_price ? (() => {
                         const cc = ccCalc(sig.entry_price);
+                        const prem = sig.cc_premium_estimate ?? cc.premMid;
+                        const isLive = sig.cc_premium_estimate != null;
                         return (
                           <span className="inline-flex flex-col gap-0.5">
-                            <span className="text-amber-400 font-semibold text-xs">💰 Sell CC</span>
+                            <span className="text-amber-400 font-semibold text-xs flex items-center gap-1">
+                              💰 Sell CC
+                              {isLive && <span className="text-amber-600 font-normal text-xs">IV-priced</span>}
+                            </span>
                             <span className="text-slate-300 text-xs tabular-nums whitespace-nowrap">
-                              ${cc.strike.toFixed(2)} · ~${cc.premMid.toFixed(2)} · 30d
+                              ${cc.strike.toFixed(2)} · ~${prem.toFixed(2)} · 30d
                             </span>
                           </span>
                         );
@@ -269,12 +276,17 @@ export default function SignalsPage() {
                       <td colSpan={16} className="px-5 py-4">
                         <div>
                           {sig.signal_type?.toUpperCase() === "STRONG_BUY" && sig.entry_price && (() => {
-                            const cc = ccCalc(sig.entry_price);
+                            const cc   = ccCalc(sig.entry_price);
+                            const prem = sig.cc_premium_estimate ?? cc.premMid;
+                            const iv   = sig.implied_volatility;
+                            const isLive = sig.cc_premium_estimate != null;
                             return (
                               <div className="mb-4 bg-amber-950/30 border border-amber-700/30 rounded-xl px-4 py-4">
                                 <p className="text-amber-400 font-semibold text-xs uppercase tracking-wide mb-3 flex items-center gap-1.5">
                                   💰 Covered Call Opportunity
-                                  <span className="text-amber-600 normal-case font-normal">— est. only, not a guarantee</span>
+                                  <span className="text-amber-600 normal-case font-normal">
+                                    {isLive ? "— Black-Scholes estimate" : "— est. only, not a guarantee"}
+                                  </span>
                                 </p>
                                 <div className="grid sm:grid-cols-4 gap-4 text-sm mb-3">
                                   <div>
@@ -283,11 +295,19 @@ export default function SignalsPage() {
                                     <div className="text-slate-600 text-xs">10% above ${sig.entry_price.toFixed(2)}</div>
                                   </div>
                                   <div>
-                                    <div className="text-slate-500 text-xs mb-0.5">Est. Premium Range</div>
-                                    <div className="text-amber-400 font-bold tabular-nums">
-                                      ${cc.premLow.toFixed(2)} – ${cc.premHigh.toFixed(2)}
+                                    <div className="text-slate-500 text-xs mb-0.5">
+                                      Est. Premium {isLive ? "(B-S)" : "(Range)"}
                                     </div>
-                                    <div className="text-slate-600 text-xs">2–4% of stock price</div>
+                                    <div className="text-amber-400 font-bold tabular-nums">
+                                      {isLive
+                                        ? `$${prem.toFixed(2)}`
+                                        : `$${cc.premLow.toFixed(2)} – $${cc.premHigh.toFixed(2)}`}
+                                    </div>
+                                    <div className="text-slate-600 text-xs">
+                                      {iv != null
+                                        ? `IV: ${(iv * 100).toFixed(1)}%`
+                                        : "2–4% of stock price"}
+                                    </div>
                                   </div>
                                   <div>
                                     <div className="text-slate-500 text-xs mb-0.5">Expiration</div>
@@ -301,8 +321,10 @@ export default function SignalsPage() {
                                   </div>
                                 </div>
                                 <p className="text-slate-500 text-xs leading-relaxed">
-                                  Premiums are estimated at 2–4% of the stock price. Actual premiums depend on implied
-                                  volatility, bid-ask spread, and market conditions at time of execution.
+                                  {isLive
+                                    ? "Premium estimated using Black-Scholes with historical volatility — the same model as our +198.76% backtest. "
+                                    : "Premiums estimated at 2–4% of stock price as a fallback. "}
+                                  Actual premiums depend on implied volatility, bid-ask spread, and market conditions.
                                   Requires Level 1 options approval at your broker.{" "}
                                   <a href="/strategy" className="text-amber-400 hover:underline">Learn how covered calls work →</a>
                                 </p>
