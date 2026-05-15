@@ -67,6 +67,46 @@ export async function getTrackRecord() {
   return apiFetch("/api/track-record");
 }
 
+export async function createPaperTrade(body: {
+  ticker: string;
+  entry_price: number;
+  signal_type: string;
+  stop_loss?: number;
+  take_profit?: number;
+  notes?: string;
+}) {
+  const token = getToken();
+  return apiFetch("/api/portfolio/paper", {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function getPortfolioPositions() {
+  const token = getToken();
+  return apiFetch("/api/portfolio", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function closePortfolioPosition(id: number, exit_price: number) {
+  const token = getToken();
+  return apiFetch(`/api/portfolio/${id}/close`, {
+    method: "POST",
+    body: JSON.stringify({ exit_price }),
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function deletePortfolioPosition(id: number) {
+  const token = getToken();
+  return apiFetch(`/api/portfolio/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 // Portfolio is stored client-side in localStorage
 export interface PortfolioPosition {
   id: string;

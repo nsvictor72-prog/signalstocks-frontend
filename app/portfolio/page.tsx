@@ -1,18 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getToken, getPortfolio, savePortfolio, PortfolioPosition } from "@/lib/api";
+import {
+  getToken,
+  getPortfolioPositions,
+  closePortfolioPosition,
+  deletePortfolioPosition,
+} from "@/lib/api";
 
-function genId() {
-  return Math.random().toString(36).slice(2, 10);
+interface Position {
+  id: number;
+  ticker: string;
+  company: string;
+  is_paper_trade: boolean;
+  is_open: boolean;
+  shares: number;
+  entry_price: number;
+  entry_date: string | null;
+  stop_loss_price: number | null;
+  take_profit_price: number | null;
+  exit_price: number | null;
+  exit_date: string | null;
+  position_value: number;
+  realized_pnl: number | null;
+  realized_pnl_pct: number | null;
+  notes: string | null;
+  signal_type: string | null;
 }
 
-function pnlPct(entry: number, current: number) {
-  return ((current - entry) / entry) * 100;
+function pnlPct(entry: number, exit: number) {
+  return ((exit - entry) / entry) * 100;
 }
 
-function PnlCell({ pct }: { pct: number }) {
+function PnlBadge({ pct }: { pct: number }) {
   return (
     <span className={`font-bold tabular-nums ${pct >= 0 ? "text-emerald-400" : "text-red-400"}`}>
       {pct >= 0 ? "+" : ""}{pct.toFixed(2)}%
@@ -20,214 +41,115 @@ function PnlCell({ pct }: { pct: number }) {
   );
 }
 
-interface AddForm {
-  ticker: string;
-  shares: string;
-  entry_price: string;
-  stop_loss: string;
-  take_profit: string;
-  notes: string;
+function TypeBadge({ isPaper }: { isPaper: boolean }) {
+  return isPaper
+    ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">PAPER</span>
+    : <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-500/20   text-blue-400   border border-blue-500/30">REAL</span>;
 }
-
-const EMPTY_FORM: AddForm = { ticker: "", shares: "", entry_price: "", stop_loss: "", take_profit: "", notes: "" };
 
 export default function PortfolioPage() {
   const router = useRouter();
-  const [positions, setPositions] = useState<PortfolioPosition[]>([]);
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState<AddForm>(EMPTY_FORM);
-  const [closing, setClosing] = useState<{ id: string; price: string } | null>(null);
-  const [formError, setFormError] = useState("");
+  const [data, setData]         = useState<{ open: Position[]; closed: Position[]; paper_realized_pnl: number } | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
+  const [closing, setClosing]   = useState<{ id: number; price: string } | null>(null);
+  const [closeErr, setCloseErr] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      setData(await getPortfolioPositions());
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed";
+      if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) router.replace("/login");
+      else setError(msg);
+    } finally { setLoading(false); }
+  }, [router]);
 
   useEffect(() => {
     if (!getToken()) { router.replace("/login"); return; }
-    setPositions(getPortfolio());
-  }, [router]);
+    load();
+  }, [router, load]);
 
-  function persist(updated: PortfolioPosition[]) {
-    setPositions(updated);
-    savePortfolio(updated);
-  }
-
-  function handleAdd(e: React.FormEvent) {
-    e.preventDefault();
-    setFormError("");
-    const entry = parseFloat(form.entry_price);
-    const shares = parseFloat(form.shares);
-    if (!form.ticker || isNaN(entry) || isNaN(shares) || shares <= 0 || entry <= 0) {
-      setFormError("Ticker, shares, and entry price are required.");
-      return;
-    }
-    const pos: PortfolioPosition = {
-      id: genId(),
-      ticker: form.ticker.toUpperCase().trim(),
-      shares,
-      entry_price: entry,
-      stop_loss: form.stop_loss ? parseFloat(form.stop_loss) : undefined,
-      take_profit: form.take_profit ? parseFloat(form.take_profit) : undefined,
-      entry_date: new Date().toISOString(),
-      notes: form.notes || undefined,
-      is_open: true,
-    };
-    persist([...positions, pos]);
-    setForm(EMPTY_FORM);
-    setShowAdd(false);
-  }
-
-  function handleClose(e: React.FormEvent) {
+  async function handleClose(e: React.FormEvent) {
     e.preventDefault();
     if (!closing) return;
     const exitPrice = parseFloat(closing.price);
-    if (isNaN(exitPrice) || exitPrice <= 0) return;
-    persist(positions.map(p =>
-      p.id === closing.id
-        ? { ...p, is_open: false, exit_price: exitPrice, exit_date: new Date().toISOString() }
-        : p
-    ));
-    setClosing(null);
+    if (isNaN(exitPrice) || exitPrice <= 0) { setCloseErr("Enter a valid price"); return; }
+    setSubmitting(true);
+    setCloseErr("");
+    try {
+      await closePortfolioPosition(closing.id, exitPrice);
+      setClosing(null);
+      setLoading(true);
+      await load();
+    } catch (e: unknown) {
+      setCloseErr(e instanceof Error ? e.message : "Failed");
+    } finally { setSubmitting(false); }
   }
 
-  function handleDelete(id: string) {
-    persist(positions.filter(p => p.id !== id));
+  async function handleDelete(id: number) {
+    try {
+      await deletePortfolioPosition(id);
+      setLoading(true);
+      await load();
+    } catch { /* swallow */ }
   }
 
-  const open   = positions.filter(p => p.is_open);
-  const closed = positions.filter(p => !p.is_open);
+  if (loading) return (
+    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
-  const totalCost   = open.reduce((s, p) => s + p.shares * p.entry_price, 0);
-  const realizedPnl = closed.reduce((s, p) => {
-    if (p.exit_price == null) return s;
-    return s + p.shares * (p.exit_price - p.entry_price);
-  }, 0);
+  if (error) return (
+    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center">
+      <p className="text-red-400">{error}</p>
+    </div>
+  );
+
+  const open   = data?.open   ?? [];
+  const closed = data?.closed ?? [];
+  const paperRealized = data?.paper_realized_pnl ?? 0;
+
+  const openPaperCount  = open.filter(p => p.is_paper_trade).length;
+  const openRealCount   = open.filter(p => !p.is_paper_trade).length;
+  const totalDeployed   = open.reduce((s, p) => s + p.position_value, 0);
 
   return (
     <main className="min-h-[calc(100vh-3.5rem)] px-4 sm:px-6 lg:px-8 py-8 max-w-screen-xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Paper Portfolio</h1>
-          <p className="text-slate-400 text-sm mt-0.5">Track simulated positions. Stored locally in your browser.</p>
-        </div>
-        <button
-          onClick={() => { setShowAdd(true); setFormError(""); }}
-          className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold text-sm px-4 py-2 rounded-lg transition-colors"
-        >
-          + Add Position
-        </button>
-      </div>
 
-      {/* Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: "Open positions",  val: open.length,                         fmt: String(open.length),                        color: "" },
-          { label: "Closed trades",   val: closed.length,                        fmt: String(closed.length),                      color: "" },
-          { label: "Capital deployed",val: totalCost,                            fmt: `$${totalCost.toLocaleString("en-US", { maximumFractionDigits: 0 })}`, color: "" },
-          { label: "Realized P&L",    val: realizedPnl,                          fmt: `${realizedPnl >= 0 ? "+" : ""}$${realizedPnl.toFixed(2)}`, color: realizedPnl >= 0 ? "text-emerald-400" : "text-red-400" },
-        ].map(({ label, fmt, color }) => (
-          <div key={label} className="bg-slate-800/60 border border-slate-700 rounded-xl px-5 py-4">
-            <div className={`text-2xl font-bold ${color || "text-white"}`}>{fmt}</div>
-            <div className="text-slate-400 text-xs mt-1">{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Add position modal */}
-      {showAdd && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6">
-            <h2 className="text-white font-bold text-lg mb-4">Add Position</h2>
-            {formError && (
-              <p className="text-red-400 text-sm mb-3 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">{formError}</p>
-            )}
-            <form onSubmit={handleAdd} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1">Ticker *</label>
-                  <input
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
-                    value={form.ticker} onChange={e => setForm(f => ({ ...f, ticker: e.target.value }))}
-                    placeholder="AAPL" required
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1">Shares *</label>
-                  <input
-                    type="number" min="0.01" step="any"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
-                    value={form.shares} onChange={e => setForm(f => ({ ...f, shares: e.target.value }))}
-                    placeholder="100" required
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1">Entry Price *</label>
-                  <input
-                    type="number" min="0.01" step="any"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
-                    value={form.entry_price} onChange={e => setForm(f => ({ ...f, entry_price: e.target.value }))}
-                    placeholder="150.00" required
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1">Stop Loss</label>
-                  <input
-                    type="number" min="0" step="any"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
-                    value={form.stop_loss} onChange={e => setForm(f => ({ ...f, stop_loss: e.target.value }))}
-                    placeholder="140.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1">Take Profit</label>
-                  <input
-                    type="number" min="0" step="any"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
-                    value={form.take_profit} onChange={e => setForm(f => ({ ...f, take_profit: e.target.value }))}
-                    placeholder="170.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1">Notes</label>
-                  <input
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
-                    value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="submit" className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-lg text-sm transition-colors">
-                  Add Position
-                </button>
-                <button type="button" onClick={() => setShowAdd(false)} className="flex-1 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white py-2 rounded-lg text-sm transition-colors">
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Close position modal */}
+      {/* Close modal */}
       {closing && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6">
-            <h2 className="text-white font-bold text-lg mb-4">Close Position</h2>
+            <h2 className="text-white font-bold text-lg mb-1">Close Position</h2>
+            <p className="text-slate-500 text-xs mb-4">Enter the exit price to record P&amp;L.</p>
+            {closeErr && <p className="text-red-400 text-sm mb-3">{closeErr}</p>}
             <form onSubmit={handleClose} className="space-y-4">
               <div>
                 <label className="block text-slate-400 text-xs mb-1">Exit Price</label>
                 <input
-                  type="number" min="0.01" step="any" required
+                  type="number" min="0.01" step="any" required autoFocus
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
                   value={closing.price}
                   onChange={e => setClosing(c => c ? { ...c, price: e.target.value } : null)}
                   placeholder="Enter exit price"
-                  autoFocus
                 />
               </div>
               <div className="flex gap-3">
-                <button type="submit" className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-2 rounded-lg text-sm transition-colors">
-                  Close Position
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white font-bold py-2 rounded-lg text-sm transition-colors"
+                >
+                  {submitting ? "Closing…" : "Close Position"}
                 </button>
-                <button type="button" onClick={() => setClosing(null)} className="flex-1 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white py-2 rounded-lg text-sm transition-colors">
+                <button
+                  type="button"
+                  onClick={() => { setClosing(null); setCloseErr(""); }}
+                  className="flex-1 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white py-2 rounded-lg text-sm transition-colors"
+                >
                   Cancel
                 </button>
               </div>
@@ -236,12 +158,46 @@ export default function PortfolioPage() {
         </div>
       )}
 
-      {/* Open positions table */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Portfolio</h1>
+          <p className="text-slate-400 text-sm mt-0.5">
+            Paper trades created from the Orders page. Backed by your account — persists across sessions.
+          </p>
+        </div>
+      </div>
+
+      {/* Summary strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div className="bg-slate-800/60 border border-slate-700 rounded-xl px-5 py-4">
+          <div className="text-2xl font-bold text-white">{openPaperCount}</div>
+          <div className="text-slate-400 text-xs mt-1">Open paper positions</div>
+        </div>
+        <div className="bg-slate-800/60 border border-slate-700 rounded-xl px-5 py-4">
+          <div className="text-2xl font-bold text-white">{openRealCount}</div>
+          <div className="text-slate-400 text-xs mt-1">Open real positions</div>
+        </div>
+        <div className="bg-slate-800/60 border border-slate-700 rounded-xl px-5 py-4">
+          <div className="text-2xl font-bold text-white">
+            ${totalDeployed.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+          </div>
+          <div className="text-slate-400 text-xs mt-1">Paper capital deployed</div>
+        </div>
+        <div className="bg-slate-800/60 border border-slate-700 rounded-xl px-5 py-4">
+          <div className={`text-2xl font-bold ${paperRealized >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+            {paperRealized >= 0 ? "+" : ""}${paperRealized.toFixed(2)}
+          </div>
+          <div className="text-slate-400 text-xs mt-1">Realized paper P&amp;L</div>
+        </div>
+      </div>
+
+      {/* Open positions */}
       <div className="mb-8">
         <h2 className="text-white font-semibold mb-3">Open Positions</h2>
         {open.length === 0 ? (
-          <div className="border border-slate-800 rounded-xl py-12 text-center text-slate-500">
-            No open positions. Click &ldquo;Add Position&rdquo; to start tracking.
+          <div className="border border-slate-800 rounded-xl py-14 text-center">
+            <p className="text-slate-400 text-sm mb-1">No open positions yet.</p>
+            <p className="text-slate-600 text-xs">Go to <span className="text-slate-500">Orders</span> and click <span className="text-slate-500">📄 Paper Trade</span> to simulate a position.</p>
           </div>
         ) : (
           <div className="rounded-xl border border-slate-800 overflow-hidden">
@@ -250,13 +206,13 @@ export default function PortfolioPage() {
                 <thead className="bg-slate-800/80">
                   <tr className="text-slate-400 text-xs font-medium">
                     <th className="px-5 py-3 text-left">Ticker</th>
+                    <th className="px-5 py-3 text-left">Type</th>
                     <th className="px-5 py-3 text-right">Shares</th>
                     <th className="px-5 py-3 text-right">Entry</th>
                     <th className="px-5 py-3 text-right">Cost Basis</th>
                     <th className="px-5 py-3 text-right">Stop</th>
                     <th className="px-5 py-3 text-right">Target</th>
-                    <th className="px-5 py-3 text-left">Date</th>
-                    <th className="px-5 py-3 text-left">Notes</th>
+                    <th className="px-5 py-3 text-left">Opened</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -264,21 +220,21 @@ export default function PortfolioPage() {
                   {open.map(p => (
                     <tr key={p.id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="px-5 py-4 font-bold text-white">{p.ticker}</td>
+                      <td className="px-5 py-4"><TypeBadge isPaper={p.is_paper_trade} /></td>
                       <td className="px-5 py-4 text-right tabular-nums text-slate-300">{p.shares}</td>
                       <td className="px-5 py-4 text-right tabular-nums text-slate-300">${p.entry_price.toFixed(2)}</td>
                       <td className="px-5 py-4 text-right tabular-nums text-slate-200 font-medium">
-                        ${(p.shares * p.entry_price).toLocaleString("en-US", { maximumFractionDigits: 2 })}
+                        ${(p.shares * p.entry_price).toLocaleString("en-US", { maximumFractionDigits: 0 })}
                       </td>
                       <td className="px-5 py-4 text-right tabular-nums text-red-400">
-                        {p.stop_loss ? `$${p.stop_loss.toFixed(2)}` : "—"}
+                        {p.stop_loss_price ? `$${p.stop_loss_price.toFixed(2)}` : "—"}
                       </td>
                       <td className="px-5 py-4 text-right tabular-nums text-emerald-400">
-                        {p.take_profit ? `$${p.take_profit.toFixed(2)}` : "—"}
+                        {p.take_profit_price ? `$${p.take_profit_price.toFixed(2)}` : "—"}
                       </td>
-                      <td className="px-5 py-4 text-slate-500 text-xs">
-                        {new Date(p.entry_date).toLocaleDateString()}
+                      <td className="px-5 py-4 text-slate-500 text-xs whitespace-nowrap">
+                        {p.entry_date ? new Date(p.entry_date).toLocaleDateString() : "—"}
                       </td>
-                      <td className="px-5 py-4 text-slate-500 max-w-[140px] truncate text-xs">{p.notes || "—"}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
                           <button
@@ -304,9 +260,9 @@ export default function PortfolioPage() {
         )}
       </div>
 
-      {/* Closed positions table */}
+      {/* Closed positions */}
       {closed.length > 0 && (
-        <div>
+        <div className="mb-8">
           <h2 className="text-white font-semibold mb-3">Closed Trades</h2>
           <div className="rounded-xl border border-slate-800 overflow-hidden">
             <div className="overflow-x-auto">
@@ -314,33 +270,35 @@ export default function PortfolioPage() {
                 <thead className="bg-slate-800/80">
                   <tr className="text-slate-400 text-xs font-medium">
                     <th className="px-5 py-3 text-left">Ticker</th>
+                    <th className="px-5 py-3 text-left">Type</th>
                     <th className="px-5 py-3 text-right">Shares</th>
                     <th className="px-5 py-3 text-right">Entry</th>
                     <th className="px-5 py-3 text-right">Exit</th>
-                    <th className="px-5 py-3 text-right">P&L $</th>
-                    <th className="px-5 py-3 text-right">P&L %</th>
+                    <th className="px-5 py-3 text-right">P&amp;L $</th>
+                    <th className="px-5 py-3 text-right">P&amp;L %</th>
                     <th className="px-5 py-3 text-left">Closed</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/80">
                   {closed.map(p => {
-                    const exitPx = p.exit_price ?? p.entry_price;
-                    const pnlD = p.shares * (exitPx - p.entry_price);
-                    const pnlP = pnlPct(p.entry_price, exitPx);
+                    const exitPx  = p.exit_price ?? p.entry_price;
+                    const pnlD    = p.realized_pnl ?? (p.shares * (exitPx - p.entry_price));
+                    const pnlP    = p.realized_pnl_pct ?? pnlPct(p.entry_price, exitPx);
                     return (
                       <tr key={p.id} className="hover:bg-slate-800/30 transition-colors">
                         <td className="px-5 py-4 font-bold text-white">{p.ticker}</td>
+                        <td className="px-5 py-4"><TypeBadge isPaper={p.is_paper_trade} /></td>
                         <td className="px-5 py-4 text-right tabular-nums text-slate-300">{p.shares}</td>
                         <td className="px-5 py-4 text-right tabular-nums text-slate-400">${p.entry_price.toFixed(2)}</td>
                         <td className="px-5 py-4 text-right tabular-nums text-slate-300">${exitPx.toFixed(2)}</td>
                         <td className="px-5 py-4 text-right tabular-nums">
-                          <PnlCell pct={(pnlD / (p.shares * p.entry_price)) * 100} />
+                          <PnlBadge pct={(pnlD / (p.shares * p.entry_price)) * 100} />
                         </td>
                         <td className="px-5 py-4 text-right tabular-nums">
-                          <PnlCell pct={pnlP} />
+                          <PnlBadge pct={pnlP} />
                         </td>
-                        <td className="px-5 py-4 text-slate-500 text-xs">
+                        <td className="px-5 py-4 text-slate-500 text-xs whitespace-nowrap">
                           {p.exit_date ? new Date(p.exit_date).toLocaleDateString() : "—"}
                         </td>
                         <td className="px-5 py-4">
@@ -360,6 +318,13 @@ export default function PortfolioPage() {
           </div>
         </div>
       )}
+
+      {/* Disclaimer */}
+      <p className="text-slate-600 text-xs text-center leading-relaxed">
+        Paper trading is simulated and does not reflect real execution, commissions, slippage, or liquidity.
+        Positions are sized at $10,000 each with −8% stop loss and +12% take profit targets.
+        Results are for educational purposes only.
+      </p>
     </main>
   );
 }
