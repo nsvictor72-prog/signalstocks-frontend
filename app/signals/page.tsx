@@ -70,27 +70,36 @@ const ALL_TYPES = ["ALL", "STRONG_BUY", "BUY", "HOLD", "SELL", "STRONG_SELL"];
 
 export default function SignalsPage() {
   const router = useRouter();
-  const [signals, setSignals] = useState<Signal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [signals, setSignals]     = useState<Signal[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError]         = useState("");
+  const [expanded, setExpanded]   = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [minConfidence, setMinConfidence] = useState(0);
-  const [sortKey, setSortKey] = useState<keyof Signal>("composite_score");
-  const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
+  const [sortKey, setSortKey]     = useState<keyof Signal>("composite_score");
+  const [sortDir, setSortDir]     = useState<"desc" | "asc">("desc");
+
+  async function fetchSignals(isRefresh = false) {
+    if (isRefresh) setRefreshing(true);
+    try {
+      const data = await getSignals();
+      setSignals(Array.isArray(data) ? data : data.signals ?? []);
+      setError("");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed";
+      if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) router.replace("/login");
+      else setError(msg);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
 
   useEffect(() => {
     if (!getToken()) { router.replace("/login"); return; }
-    (async () => {
-      try {
-        const data = await getSignals();
-        setSignals(Array.isArray(data) ? data : data.signals ?? []);
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Failed";
-        if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) router.replace("/login");
-        else setError(msg);
-      } finally { setLoading(false); }
-    })();
+    fetchSignals();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const filtered = useMemo(() => {
@@ -143,6 +152,16 @@ export default function SignalsPage() {
           <h1 className="text-2xl font-bold text-white">All Signals</h1>
           <p className="text-slate-400 text-sm mt-0.5">{filtered.length} of {signals.length} signals</p>
         </div>
+        <button
+          onClick={() => fetchSignals(true)}
+          disabled={refreshing}
+          className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-slate-700 hover:border-emerald-500/50 bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-all disabled:opacity-50"
+        >
+          <svg className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {refreshing ? "Refreshing…" : "Refresh"}
+        </button>
       </div>
 
       {/* Filters */}

@@ -67,6 +67,34 @@ export async function getTrackRecord() {
   return apiFetch("/api/track-record");
 }
 
+export async function getMe() {
+  const token = getToken();
+  return apiFetch("/api/auth/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function changePassword(current_password: string, new_password: string) {
+  const token = getToken();
+  return apiFetch("/api/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ current_password, new_password }),
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function deleteAccount() {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/api/auth/me`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || "Failed to delete account");
+  }
+}
+
 export async function createPaperTrade(body: {
   ticker: string;
   entry_price: number;
