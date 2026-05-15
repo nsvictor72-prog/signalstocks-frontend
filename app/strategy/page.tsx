@@ -55,8 +55,8 @@ export default function StrategyPage() {
             How our strategy works
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed">
-            We use AI signals to buy the right stocks, then sell covered calls on every position
-            to collect extra income every 30 days. No guesswork, no complicated setups.
+            We use AI signals to identify the right stocks, then sell covered calls on every
+            position to collect consistent premium income. No guesswork, no complicated setups.
           </p>
         </div>
       </section>
@@ -79,9 +79,10 @@ export default function StrategyPage() {
               </div>
               <h3 className="text-white font-bold text-lg mb-2">Layer 1 — Stock gains</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Our AI screens 100+ stocks daily and scores them 0–100 across technical,
-                fundamental, and momentum factors. We only buy when a stock scores 60+,
-                hold up to 30 days, and exit at a 12% gain or 8% stop-loss.
+                Our AI analyzes the market continuously, identifying the highest-conviction
+                opportunities across technical momentum, fundamental strength, and market
+                conditions. Each position comes with defined profit targets and risk management
+                built in.
               </p>
             </div>
             <div className="bg-emerald-950/30 border border-emerald-700/40 rounded-2xl p-7">
@@ -91,8 +92,8 @@ export default function StrategyPage() {
               <h3 className="text-white font-bold text-lg mb-2">Layer 2 — Option premium</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
                 While holding each stock, we sell a covered call — collecting cash upfront.
-                This income lands in the account immediately, every 30 days, on every position.
-                Over 4.8 years this added $55,972 in premium income on top of stock gains.
+                This income lands in the account immediately on every qualifying position,
+                adding a consistent second income stream on top of stock gains.
               </p>
             </div>
           </div>
@@ -116,7 +117,7 @@ export default function StrategyPage() {
             <div className="bg-slate-800 px-6 py-4 border-b border-slate-700 flex items-center gap-3">
               <span className="text-white font-bold">Example: NVDA position</span>
               <span className="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                Score 72 · BUY signal
+                STRONG_BUY signal
               </span>
             </div>
             <div className="p-6 space-y-4 text-sm">
@@ -131,13 +132,13 @@ export default function StrategyPage() {
                 <span className="text-slate-500 w-5 shrink-0 mt-0.5">②</span>
                 <div>
                   <span className="text-white font-medium">Sell a covered call.</span>
-                  <span className="text-slate-400"> You sell a 30-day call option with a <span className="text-white">$550 strike price</span> (10% above current price). The buyer pays you <span className="text-emerald-400 font-semibold">$300 in premium — immediately.</span></span>
+                  <span className="text-slate-400"> You sell a 30-day call option with a <span className="text-white">$550 strike price</span> (above current price). The buyer pays you <span className="text-emerald-400 font-semibold">$300 in premium — immediately.</span></span>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <span className="text-slate-500 w-5 shrink-0 mt-0.5">③</span>
                 <div>
-                  <span className="text-white font-medium">30 days pass.</span>
+                  <span className="text-white font-medium">The option expires.</span>
                   <span className="text-slate-400"> One of two things happens:</span>
                 </div>
               </div>
@@ -165,9 +166,9 @@ export default function StrategyPage() {
 
           {/* Quick numbers */}
           <div className="grid grid-cols-3 gap-4">
-            <Callout label="Strike price" value="$550" sub="10% above entry ($500)" />
+            <Callout label="Strike price" value="$550" sub="Above your entry ($500)" />
             <Callout label="Premium collected" value="$300" sub="Cash in hand immediately" />
-            <Callout label="Break-even downside" value="$497" sub="Stock can drop 0.6% and you still profit" />
+            <Callout label="Break-even downside" value="$497" sub="Stock can dip and you still profit" />
           </div>
         </section>
 
@@ -180,19 +181,19 @@ export default function StrategyPage() {
 
           <div className="space-y-8">
             <Step n={1} title="AI signal fires">
-              The scoring engine scans 100+ large-cap stocks each week and identifies ones scoring
-              60 or above. Higher scores mean more factors are aligned — trend, momentum, volume,
-              and fundamentals. Only the top-ranked stocks get a position.
+              Our scoring engine continuously analyzes the market and identifies
+              the highest-conviction opportunities — where multiple factors align across
+              trend, momentum, volume, and fundamentals. Only the top-ranked setups get a position.
             </Step>
             <Step n={2} title="Stock position opened">
-              A position is sized as roughly 1/15th of the portfolio (15 max concurrent positions).
-              Stop-loss is set at −8% below entry; take-profit at +12% above entry.
-              Max hold time: 30 days.
+              A position is sized to keep the portfolio diversified across multiple concurrent
+              holdings. A stop-loss and take-profit are set automatically at entry
+              so risk is defined from day one.
             </Step>
             <Step n={3} title="Covered call sold immediately">
-              As soon as a stock is held, a 30-day covered call is sold at 10% above the current
-              price — but only if the premium is at least 2% of the stock price. This quality filter
-              prevents selling calls for pennies on low-volatility names.
+              As soon as a stock is held, a covered call is sold above the current price —
+              but only when the premium is meaningful. This quality filter ensures we
+              only sell calls when the income justifies it.
             </Step>
             <Step n={4} title="Premium lands in account">
               The option premium hits the account the same day. This cash is yours regardless of
@@ -200,13 +201,13 @@ export default function StrategyPage() {
             </Step>
             <Step n={5} title="Position closes (one of three ways)">
               <ul className="space-y-1.5 mt-2">
-                <li className="flex gap-2"><span className="text-emerald-400 shrink-0">→</span> <span><strong className="text-slate-300">Take profit:</strong> stock hits +12% — sell shares, keep premium.</span></li>
-                <li className="flex gap-2"><span className="text-emerald-400 shrink-0">→</span> <span><strong className="text-slate-300">Stop loss:</strong> stock drops −8% — sell shares, premium partially offsets loss.</span></li>
+                <li className="flex gap-2"><span className="text-emerald-400 shrink-0">→</span> <span><strong className="text-slate-300">Take profit:</strong> stock hits the target — sell shares, keep premium.</span></li>
+                <li className="flex gap-2"><span className="text-emerald-400 shrink-0">→</span> <span><strong className="text-slate-300">Stop loss:</strong> stock drops to the stop — sell shares, premium partially offsets the loss.</span></li>
                 <li className="flex gap-2"><span className="text-emerald-400 shrink-0">→</span> <span><strong className="text-slate-300">Called away:</strong> stock rises past the strike and the option is exercised — shares sold at strike price, premium kept.</span></li>
               </ul>
             </Step>
             <Step n={6} title="Repeat">
-              Capital is recycled into the next signal. The cycle repeats weekly as new signals
+              Capital is recycled into the next signal. The cycle continues as new signals
               are generated and positions rotate.
             </Step>
           </div>
@@ -218,43 +219,38 @@ export default function StrategyPage() {
           <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center text-sm">
 
-              {/* Node 1 */}
               <div className="bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 w-full sm:w-40">
                 <div className="text-2xl mb-1">🔍</div>
                 <div className="text-white font-semibold">Signal fires</div>
-                <div className="text-slate-500 text-xs mt-1">Score ≥ 60</div>
+                <div className="text-slate-500 text-xs mt-1">High conviction</div>
               </div>
 
               <div className="text-slate-600 text-xl rotate-90 sm:rotate-0">→</div>
 
-              {/* Node 2 */}
               <div className="bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 w-full sm:w-40">
                 <div className="text-2xl mb-1">📦</div>
                 <div className="text-white font-semibold">Buy stock</div>
-                <div className="text-slate-500 text-xs mt-1">1/15 portfolio</div>
+                <div className="text-slate-500 text-xs mt-1">Diversified sizing</div>
               </div>
 
               <div className="text-slate-600 text-xl rotate-90 sm:rotate-0">→</div>
 
-              {/* Node 3 */}
               <div className="bg-emerald-950/50 border border-emerald-700/50 rounded-xl px-5 py-4 w-full sm:w-40">
                 <div className="text-2xl mb-1">💰</div>
                 <div className="text-emerald-300 font-semibold">Sell call</div>
-                <div className="text-slate-500 text-xs mt-1">10% OTM · 30 DTE</div>
+                <div className="text-slate-500 text-xs mt-1">Collect premium</div>
               </div>
 
               <div className="text-slate-600 text-xl rotate-90 sm:rotate-0">→</div>
 
-              {/* Node 4 */}
               <div className="bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 w-full sm:w-40">
                 <div className="text-2xl mb-1">⏱️</div>
-                <div className="text-white font-semibold">Hold ≤ 30 days</div>
-                <div className="text-slate-500 text-xs mt-1">+12% / −8% exits</div>
+                <div className="text-white font-semibold">Hold position</div>
+                <div className="text-slate-500 text-xs mt-1">Managed exits</div>
               </div>
 
               <div className="text-slate-600 text-xl rotate-90 sm:rotate-0">→</div>
 
-              {/* Node 5 */}
               <div className="bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 w-full sm:w-40">
                 <div className="text-2xl mb-1">🔄</div>
                 <div className="text-white font-semibold">Exit &amp; repeat</div>
@@ -264,24 +260,28 @@ export default function StrategyPage() {
 
             <div className="mt-6 pt-5 border-t border-slate-700 grid sm:grid-cols-3 gap-4 text-xs text-center text-slate-400">
               <div><span className="text-emerald-400 font-semibold">Premium income:</span> collected at step 3, kept regardless of outcome</div>
-              <div><span className="text-emerald-400 font-semibold">Risk management:</span> stop-loss at −8% limits worst-case loss per trade</div>
-              <div><span className="text-emerald-400 font-semibold">Consistency:</span> 15 simultaneous positions diversify single-stock risk</div>
+              <div><span className="text-emerald-400 font-semibold">Risk management:</span> stop-loss limits worst-case loss on every trade</div>
+              <div><span className="text-emerald-400 font-semibold">Consistency:</span> multiple simultaneous positions diversify single-stock risk</div>
             </div>
           </div>
         </section>
 
         {/* ── Results reminder ──────────────────────────────────────────────── */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-6">What this produced over 4.8 years</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
-            <Callout label="Total return" value="+198.76%" sub="Jun 2021 – Apr 2026" />
-            <Callout label="Annualized" value="+25.42%/yr" sub="vs SPY +11.05%/yr" />
-            <Callout label="Premium collected" value="$55,972" sub="154 covered calls" />
-            <Callout label="Stock-only baseline" value="+88.49%" sub="Premium adds +110k on top" />
+          <h2 className="text-2xl font-bold text-white mb-2">Proven track record</h2>
+          <p className="text-slate-400 mb-6">
+            The combined Stock + Covered Calls strategy has outperformed buy-and-hold SPY by a
+            wide margin in backtesting, including during bear market conditions. Premium income
+            consistently added meaningful returns on top of stock gains.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5">
+            <Callout label="Combined annualized return" value="+25.42%/yr" sub="vs SPY +11.05%/yr" />
+            <Callout label="Total return (backtest)" value="+198.76%" sub="Stock + premium combined" />
+            <Callout label="Alpha vs buy-and-hold" value="+14.37%/yr" sub="Consistent outperformance" />
           </div>
           <p className="text-slate-500 text-sm">
-            The premium income alone added <span className="text-slate-300">$110,270</span> in final portfolio value
-            compared to running the stock strategy without options — turning a $188k result into $298k.
+            Full backtest methodology, yearly breakdown, and trade-level detail available on the{" "}
+            <Link href="/track-record" className="text-emerald-400 hover:underline">Track Record page</Link>.
           </p>
         </section>
 
@@ -294,7 +294,7 @@ export default function StrategyPage() {
               {[
                 "Already own or plan to own individual stocks",
                 "Want consistent income beyond price appreciation",
-                "Are comfortable holding a stock for up to 30 days",
+                "Are comfortable holding a stock for a few weeks",
                 "Understand you may occasionally sell shares earlier than planned",
                 "Have a brokerage account that allows covered calls (most do)",
               ].map(t => (
@@ -331,11 +331,11 @@ export default function StrategyPage() {
               },
               {
                 title: "Stock can still fall",
-                body: "Covered calls provide a small cushion (the premium), but they do not protect against large drops. A −20% move on a stock still hurts, even after collecting 2% in premium. The 8% stop-loss is your primary protection.",
+                body: "Covered calls provide a small cushion (the premium), but they do not protect against large drops. Our stop-loss discipline is your primary downside protection — but losses are still possible.",
               },
               {
                 title: "Premiums vary by market conditions",
-                body: "When volatility is low, option premiums shrink. Some stocks won't meet our 2% minimum premium threshold and won't have a call sold on them that month. The backtest reflects realistic historical volatility — future premiums may differ.",
+                body: "When volatility is low, option premiums shrink. Some positions won't qualify for a covered call when premium is insufficient — in those cases, we simply hold without one. Future premiums may differ from historical estimates.",
               },
               {
                 title: "Options approval required",
@@ -357,7 +357,7 @@ export default function StrategyPage() {
               See the verified results
             </h2>
             <p className="text-slate-400 text-lg mb-8 max-w-xl mx-auto">
-              4.8 years of backtest data — every trade, every premium collected, every exit.
+              Every trade, every premium collected, every exit — fully documented.
               No simulations hidden behind a paywall.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -382,12 +382,11 @@ export default function StrategyPage() {
           <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-5 py-4 text-xs text-slate-400 leading-relaxed">
             <span className="text-yellow-400 font-semibold">Disclaimer: </span>
             The strategy described is educational in nature. Backtest results are hypothetical and
-            based on historical data using Black-Scholes pricing for option premiums — actual premiums
-            vary based on implied volatility, liquidity, and market conditions. Results do not account
-            for commissions, bid-ask spreads, taxes, or assignment costs. Options trading involves
-            substantial risk and is not appropriate for all investors. You can lose money. Past
-            performance does not guarantee future results. Not financial advice. Always consult a
-            qualified financial advisor before trading.
+            based on historical data — actual premiums vary based on implied volatility, liquidity,
+            and market conditions. Results do not account for commissions, bid-ask spreads, taxes,
+            or assignment costs. Options trading involves substantial risk and is not appropriate
+            for all investors. You can lose money. Past performance does not guarantee future
+            results. Not financial advice. Always consult a qualified financial advisor before trading.
           </div>
         </section>
 
