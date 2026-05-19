@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { register, login, setToken } from "@/lib/api";
+import { register, resendVerification } from "@/lib/api";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,15 +28,66 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register(email, password);
-      // Auto-login after registration
-      const data = await login(email, password);
-      setToken(data.access_token || data.token);
-      router.push("/dashboard");
+      setSubmitted(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleResend() {
+    setResendLoading(true);
+    setResendMsg("");
+    try {
+      await resendVerification(email);
+      setResendMsg("Verification email resent. Check your inbox.");
+    } catch {
+      setResendMsg("Could not resend. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
+  if (submitted) {
+    return (
+      <main className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-md text-center">
+          <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-3">Check your email</h1>
+          <p className="text-slate-400 mb-2">
+            We sent a verification link to
+          </p>
+          <p className="text-emerald-400 font-medium mb-6">{email}</p>
+          <p className="text-slate-500 text-sm mb-8">
+            Click the link in the email to activate your account. The link expires in 24 hours.
+          </p>
+
+          {resendMsg && (
+            <p className="text-sm text-emerald-400 mb-4">{resendMsg}</p>
+          )}
+
+          <button
+            onClick={handleResend}
+            disabled={resendLoading}
+            className="text-sm text-slate-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
+          >
+            {resendLoading ? "Resending…" : "Didn't receive it? Resend email"}
+          </button>
+
+          <p className="text-center text-slate-500 text-sm mt-8">
+            Already verified?{" "}
+            <Link href="/login" className="text-emerald-400 hover:underline font-medium">
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -115,7 +167,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Feature list */}
         <ul className="mt-6 space-y-2 text-sm text-slate-400">
           {[
             "10 AI signals per day, free forever",

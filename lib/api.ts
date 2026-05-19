@@ -42,6 +42,31 @@ export async function login(email: string, password: string) {
   });
 }
 
+export async function verifyEmail(token: string) {
+  return apiFetch(`/api/auth/verify/${token}`);
+}
+
+export async function resendVerification(email: string) {
+  return apiFetch("/api/auth/resend-verification", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function forgotPassword(email: string) {
+  return apiFetch("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token: string, new_password: string) {
+  return apiFetch("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, new_password }),
+  });
+}
+
 export async function getSignals() {
   const token = getToken();
   return apiFetch("/api/signals", {
