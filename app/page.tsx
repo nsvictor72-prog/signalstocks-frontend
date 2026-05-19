@@ -51,8 +51,8 @@ export default function LandingPage() {
             </div>
             <div className="w-px h-12 bg-slate-700 hidden sm:block" />
             <div className="text-center">
-              <div className="text-4xl font-bold text-white">260+</div>
-              <div className="text-slate-400 text-sm mt-1">Stocks screened</div>
+              <div className="text-4xl font-bold text-white">Multi-factor</div>
+              <div className="text-slate-400 text-sm mt-1">AI Analysis</div>
             </div>
             <div className="w-px h-12 bg-slate-700 hidden sm:block" />
             <div className="text-center">
