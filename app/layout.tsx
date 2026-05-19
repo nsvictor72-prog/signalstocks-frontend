@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "SignalStocks — AI-Powered Stock Signals",
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="bg-[#0f172a] text-slate-100 antialiased">
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );
