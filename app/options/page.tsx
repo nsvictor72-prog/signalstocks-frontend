@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getOptions, getToken } from "@/lib/api";
+import { getOptions } from "@/lib/api";
 
 interface OptionContract {
   type: string;
@@ -68,23 +67,19 @@ function ContractsTable({ contracts, type }: { contracts: OptionContract[]; type
 }
 
 export default function OptionsPage() {
-  const router = useRouter();
   const [data, setData] = useState<OptionsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!getToken()) { router.replace("/login"); return; }
     (async () => {
       try {
         setData(await getOptions());
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Failed";
-        if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) router.replace("/login");
-        else setError(msg);
+        setError(e instanceof Error ? e.message : "Failed to load options data");
       } finally { setLoading(false); }
     })();
-  }, [router]);
+  }, []);
 
   if (loading) return (
     <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center">

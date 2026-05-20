@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getSignals, getToken } from "@/lib/api";
+import { getSignals } from "@/lib/api";
 
 interface Signal {
   ticker: string;
@@ -86,24 +85,20 @@ function Section({ title, description, signals }: { title: string; description: 
 }
 
 export default function SmartMoneyPage() {
-  const router = useRouter();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!getToken()) { router.replace("/login"); return; }
     (async () => {
       try {
         const data = await getSignals();
         setSignals(Array.isArray(data) ? data : data.signals ?? []);
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Failed";
-        if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) router.replace("/login");
-        else setError(msg);
+        setError(e instanceof Error ? e.message : "Failed to load signals");
       } finally { setLoading(false); }
     })();
-  }, [router]);
+  }, []);
 
   const strongBuy = signals.filter(s => s.signal_type?.toUpperCase() === "STRONG_BUY");
   const topMomentum = [...signals]

@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getToken } from "@/lib/api";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -107,20 +104,6 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export default function BacktestPage() {
-  const router = useRouter();
-  const [authed, setAuthed] = useState(false);
-
-  useEffect(() => {
-    if (!getToken()) { router.replace("/login"); return; }
-    setAuthed(true);
-  }, [router]);
-
-  if (!authed) return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-
   return (
     <main className="min-h-[calc(100vh-3.5rem)] px-4 sm:px-6 lg:px-8 py-8 max-w-screen-xl mx-auto">
 

@@ -18,7 +18,6 @@ const HOW_IT_WORKS = [
   },
 ];
 
-
 export default function LandingPage() {
   return (
     <main className="min-h-screen">
@@ -28,7 +27,7 @@ export default function LandingPage() {
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-1.5 mb-8">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-emerald-400 text-sm font-medium">Live signals updated daily</span>
+            <span className="text-emerald-400 text-sm font-medium">Live signals — free, no account needed</span>
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
@@ -63,21 +62,20 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/register"
+              href="/signals"
               className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-8 py-4 rounded-xl text-lg transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-400/30"
             >
-              Start Free — No Credit Card
+              View Today&apos;s Signals
             </Link>
             <Link
-              href="/login"
+              href="/strategy"
               className="border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white px-8 py-4 rounded-xl text-lg transition-all"
             >
-              Sign In
+              How It Works
             </Link>
           </div>
         </div>
       </section>
-
 
       {/* How it works */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
@@ -109,27 +107,19 @@ export default function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center bg-gradient-to-r from-emerald-900/40 to-cyan-900/20 border border-emerald-500/20 rounded-3xl p-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Ready to trade smarter?
+            Free, open, no account needed
           </h2>
           <p className="text-slate-400 mb-8 text-lg">
-            Join thousands of traders using AI-powered signals. Free to start — no credit card required.
+            All signals are public. No login, no paywall, no credit card.
           </p>
           <Link
-            href="/register"
+            href="/signals"
             className="inline-block bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-10 py-4 rounded-xl text-lg transition-all shadow-lg shadow-emerald-500/20"
           >
-            Create Free Account
+            View Signals
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-800 py-8 px-4 text-center text-slate-500 text-sm">
-        <p>
-          © 2026 SignalStocks. Past performance does not guarantee future results.{" "}
-          <span className="text-slate-600">Not financial advice.</span>
-        </p>
-      </footer>
     </main>
   );
 }

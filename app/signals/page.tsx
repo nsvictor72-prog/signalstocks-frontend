@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { getSignals, getToken } from "@/lib/api";
+import { getSignals } from "@/lib/api";
+
 
 interface Signal {
   ticker: string;
@@ -71,7 +71,6 @@ function ScoreCell({ val, max = 100 }: { val: number; max?: number }) {
 const ALL_TYPES = ["ALL", "STRONG_BUY", "BUY", "HOLD", "SELL", "STRONG_SELL"];
 
 export default function SignalsPage() {
-  const router = useRouter();
   const [signals, setSignals]     = useState<Signal[]>([]);
   const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,9 +88,7 @@ export default function SignalsPage() {
       setSignals(Array.isArray(data) ? data : data.signals ?? []);
       setError("");
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Failed";
-      if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) router.replace("/login");
-      else setError(msg);
+      setError(e instanceof Error ? e.message : "Failed to load signals");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -99,10 +96,9 @@ export default function SignalsPage() {
   }
 
   useEffect(() => {
-    if (!getToken()) { router.replace("/login"); return; }
     fetchSignals();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, []);
 
   const filtered = useMemo(() => {
     let s = signals.filter(sig => {

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getSignals, getToken } from "@/lib/api";
+import { getSignals } from "@/lib/api";
 
 interface Signal {
   ticker: string;
@@ -45,33 +44,23 @@ function SignalBadge({ type }: { type: string }) {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!getToken()) {
-      router.replace("/login");
-      return;
-    }
     (async () => {
       try {
         const data = await getSignals();
         setSignals(Array.isArray(data) ? data : data.signals ?? []);
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to load signals";
-        if (msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
-          router.replace("/login");
-        } else {
-          setError(msg);
-        }
+        setError(err instanceof Error ? err.message : "Failed to load signals");
       } finally {
         setLoading(false);
       }
     })();
-  }, [router]);
+  }, []);
 
   if (loading) {
     return (
