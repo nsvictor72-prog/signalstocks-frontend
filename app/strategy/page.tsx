@@ -362,16 +362,16 @@ export default function StrategyPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/track-record"
+                href="/signals"
                 className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-10 py-4 rounded-xl text-lg transition-all shadow-lg shadow-emerald-500/20"
               >
-                View Track Record
+                View Today&apos;s Signals
               </Link>
               <Link
-                href="/register"
+                href="/track-record"
                 className="border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white px-10 py-4 rounded-xl text-lg transition-all"
               >
-                Start Free — 10 Signals/Day
+                View Track Record
               </Link>
             </div>
           </div>
