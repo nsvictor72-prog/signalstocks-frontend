@@ -16,6 +16,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5969348027694388"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="bg-[#0f172a] text-slate-100 antialiased">
         <Navbar />
         {children}
